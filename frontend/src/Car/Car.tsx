@@ -4,15 +4,14 @@ import CameraController from './CameraController'
 
 const Car: React.FC = () => {
   let speed = 0
-  const maxSpeed = 10
+  const maxSpeed = 20
   const acceleration = 5
-  const friction = 7
+  const friction = 9
   const rotationMultiplier = 5
   let wPressed = false
   let aPressed = false
   let sPressed = false
   let dPressed = false
-  const cameraDistance = 4
   const mesh = useRef<MeshProps>()
   function keyDown(e: KeyboardEvent) {
     if (e.keyCode === 87) wPressed = true
