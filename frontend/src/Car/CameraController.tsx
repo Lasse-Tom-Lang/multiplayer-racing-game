@@ -6,12 +6,13 @@ interface CameraControllerProps {
 }
 
 const CameraController: React.FC<CameraControllerProps> = (props) => {
-  const cameraDistance = 4
+  const cameraDistance = 6
+  const cameraHight = 3
   let carRotation = props.carMesh.current?.rotation.y * (180/Math.PI)
   const {camera} = useThree()
   useFrame((state, deltaTime) => {
     let newCameraPosition = {x: 0, y: 0, z: 0}
-    newCameraPosition.y = props.carMesh.current!.position.y + cameraDistance
+    newCameraPosition.y = props.carMesh.current!.position.y + cameraHight
     if (carRotation < 90 || carRotation > 270) {
       newCameraPosition.z = props.carMesh.current!.position.z + Math.cos(props.carMesh.current!.rotation.y) * cameraDistance
     }

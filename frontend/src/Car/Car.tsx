@@ -5,8 +5,10 @@ import CameraController from './CameraController'
 const Car: React.FC = () => {
   let speed = 0
   const maxSpeed = 20
+  const maxBackSpeed = -10
+  const maxRotationSpeed = 8
   const acceleration = 5
-  const friction = 9
+  const friction = 12
   const rotationMultiplier = 5
   let wPressed = false
   let aPressed = false
@@ -36,10 +38,22 @@ const Car: React.FC = () => {
   useFrame((state, deltaTime) => {
 
     if (aPressed) {
-      mesh.current!.rotation.y += speed / rotationMultiplier * deltaTime;
+      if (speed > maxRotationSpeed) {
+        mesh.current!.rotation.y += maxRotationSpeed / rotationMultiplier * deltaTime;
+
+      }
+      else {
+        mesh.current!.rotation.y += speed / rotationMultiplier * deltaTime;
+      }
     }
     if (dPressed) {
-      mesh.current!.rotation.y -= speed / rotationMultiplier * deltaTime;
+      if (speed > maxRotationSpeed) {
+        mesh.current!.rotation.y -= maxRotationSpeed / rotationMultiplier * deltaTime;
+
+      }
+      else {
+        mesh.current!.rotation.y -= speed / rotationMultiplier * deltaTime;
+      }
     }
     if (wPressed) {
       if (speed < maxSpeed) {
@@ -52,7 +66,7 @@ const Car: React.FC = () => {
       }
     }
     if (sPressed) {
-      if (speed > -maxSpeed) {
+      if (speed > maxBackSpeed) {
         speed -= acceleration * deltaTime
       }
     }
