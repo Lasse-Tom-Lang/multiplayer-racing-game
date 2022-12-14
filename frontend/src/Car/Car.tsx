@@ -9,6 +9,7 @@ const Car: React.FC = () => {
   const maxRotationSpeed = 8
   const acceleration = 5
   const friction = 12
+  const driftMultiplier = 2
   const rotationMultiplier = 5
   let wPressed = false
   let aPressed = false
@@ -40,7 +41,8 @@ const Car: React.FC = () => {
     if (aPressed) {
       if (speed > maxRotationSpeed) {
         mesh.current!.rotation.y += maxRotationSpeed / rotationMultiplier * deltaTime;
-
+        mesh.current!.position.z -= Math.cos(mesh.current!.rotation.y - 90) * speed / driftMultiplier * deltaTime
+        mesh.current!.position.x -= Math.sin(mesh.current!.rotation.y - 90) * speed / driftMultiplier * deltaTime
       }
       else {
         mesh.current!.rotation.y += speed / rotationMultiplier * deltaTime;
@@ -49,7 +51,8 @@ const Car: React.FC = () => {
     if (dPressed) {
       if (speed > maxRotationSpeed) {
         mesh.current!.rotation.y -= maxRotationSpeed / rotationMultiplier * deltaTime;
-
+        mesh.current!.position.z -= Math.cos(mesh.current!.rotation.y + 90) * speed / driftMultiplier * deltaTime
+        mesh.current!.position.x -= Math.sin(mesh.current!.rotation.y + 90) * speed / driftMultiplier * deltaTime
       }
       else {
         mesh.current!.rotation.y -= speed / rotationMultiplier * deltaTime;
@@ -83,9 +86,9 @@ const Car: React.FC = () => {
     <>
       <mesh ref={mesh}>
         <boxGeometry args={[1, 1, 1]}>
-          <CameraController carMesh={mesh}/>
+          <CameraController carMesh={mesh} />
         </boxGeometry>
-        <meshStandardMaterial color="blue"/>
+        <meshStandardMaterial color="blue" />
       </mesh>
     </>
   )
