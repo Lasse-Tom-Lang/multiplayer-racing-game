@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { MeshProps, useFrame } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import CameraController from './CameraController'
+import { useBox } from '@react-three/cannon'
 
 const Car: React.FC = () => {
   let speed = 0
@@ -15,7 +16,9 @@ const Car: React.FC = () => {
   let aPressed = false
   let sPressed = false
   let dPressed = false
-  const mesh = useRef<MeshProps>()
+  const position = useRef([0, 0, 0])
+  const rotation = useRef([0, 0, 0])
+  const [physicsRef, physicsApi] = useBox(() => ({mass: 1}))
   function keyDown(e: KeyboardEvent) {
     if (e.keyCode === 87) wPressed = true
     if (e.keyCode === 65) aPressed = true
@@ -31,31 +34,54 @@ const Car: React.FC = () => {
   useEffect(() => {
     window.addEventListener('keydown', keyDown)
     window.addEventListener('keyup', keyUp)
+    physicsApi.position.subscribe(v => position.current = v)
+    physicsApi.rotation.subscribe(v => rotation.current = v)
     return () => {
       window.removeEventListener('keydown', keyDown)
       window.removeEventListener('keyup', keyUp)
     }
   }, []);
   useFrame((state, deltaTime) => {
-
     if (aPressed) {
       if (speed > maxRotationSpeed) {
-        mesh.current!.rotation.y += maxRotationSpeed / rotationMultiplier * deltaTime;
-        mesh.current!.position.z -= Math.cos(mesh.current!.rotation.y - 90) * speed / driftMultiplier * deltaTime
-        mesh.current!.position.x -= Math.sin(mesh.current!.rotation.y - 90) * speed / driftMultiplier * deltaTime
+        // physicsApi.position.set(
+        //   -Math.sin(physicsRef.current!.rotation.y - 90) * speed / driftMultiplier,
+        //   0,
+        //   -Math.cos(physicsRef.current!.rotation.y - 90) * speed / driftMultiplier
+        // );
+        physicsApi.angularVelocity.set(
+          0,
+          maxRotationSpeed / rotationMultiplier,
+          0
+        )
       }
       else {
-        mesh.current!.rotation.y += speed / rotationMultiplier * deltaTime;
+        physicsApi.angularVelocity.set(
+          0,
+          speed / rotationMultiplier,
+          0
+        )
       }
     }
     if (dPressed) {
       if (speed > maxRotationSpeed) {
-        mesh.current!.rotation.y -= maxRotationSpeed / rotationMultiplier * deltaTime;
-        mesh.current!.position.z -= Math.cos(mesh.current!.rotation.y + 90) * speed / driftMultiplier * deltaTime
-        mesh.current!.position.x -= Math.sin(mesh.current!.rotation.y + 90) * speed / driftMultiplier * deltaTime
+        // physicsApi.position.set(
+        //   -Math.sin(physicsRef.current!.rotation.y + 90) * speed / driftMultiplier,
+        //   0,
+        //   -Math.cos(physicsRef.current!.rotation.y + 90) * speed / driftMultiplier
+        // );
+        physicsApi.angularVelocity.set(
+          0,
+          -maxRotationSpeed / rotationMultiplier,
+          0
+        )
       }
       else {
-        mesh.current!.rotation.y -= speed / rotationMultiplier * deltaTime;
+        physicsApi.angularVelocity.set(
+          0,
+          -speed / rotationMultiplier,
+          0
+        )
       }
     }
     if (wPressed) {
@@ -79,14 +105,17 @@ const Car: React.FC = () => {
       }
     }
     if ((speed < 0.08 && speed > 0) || (speed > -0.08 && speed < 0)) speed = 0
-    mesh.current!.position.z -= Math.cos(mesh.current!.rotation.y) * speed * deltaTime
-    mesh.current!.position.x -= Math.sin(mesh.current!.rotation.y) * speed * deltaTime
+    physicsApi.velocity.set(
+      -Math.sin(rotation.current[1]) * speed,
+      0,
+      -Math.cos(rotation.current[1]) * speed
+    )
   })
   return (
     <>
-      <mesh ref={mesh}>
+      <mesh ref={physicsRef}>
         <boxGeometry args={[1, 1, 1]}>
-          <CameraController carMesh={mesh} />
+          <CameraController carPosition={position} carRotation={rotation} />
         </boxGeometry>
         <meshStandardMaterial color="blue" />
       </mesh>

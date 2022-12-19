@@ -1,34 +1,38 @@
-import { MeshProps, useThree, useFrame } from "@react-three/fiber"
-import { MutableRefObject } from "react"
+import { useThree, useFrame } from "@react-three/fiber"
 
 interface CameraControllerProps {
-  carMesh: MutableRefObject<MeshProps | undefined>
+  carPosition: {
+    current: number[]
+  }
+  carRotation: {
+    current: number[]
+  }
 }
 
 const CameraController: React.FC<CameraControllerProps> = (props) => {
   const cameraDistance = 6
   const cameraHight = 3
-  let carRotation = props.carMesh.current?.rotation.y * (180/Math.PI)
+  let carRotation = props.carRotation.current[1] * (180/Math.PI)
   const {camera} = useThree()
   useFrame((state, deltaTime) => {
     let newCameraPosition = {x: 0, y: 0, z: 0}
-    newCameraPosition.y = props.carMesh.current!.position.y + cameraHight
+    newCameraPosition.y = props.carPosition.current[1] + cameraHight
     if (carRotation < 90 || carRotation > 270) {
-      newCameraPosition.z = props.carMesh.current!.position.z + Math.cos(props.carMesh.current!.rotation.y) * cameraDistance
+      newCameraPosition.z = props.carPosition.current[2] + Math.cos(props.carRotation.current[1]) * cameraDistance
     }
     if (carRotation > 90 && carRotation < 180) {
-      newCameraPosition.z = props.carMesh.current!.position.z - Math.cos(props.carMesh.current!.rotation.y) * cameraDistance
+      newCameraPosition.z = props.carPosition.current[2] - Math.cos(props.carRotation.current[1]) * cameraDistance
     }
     if (carRotation < 360 || carRotation > 180) {
-      newCameraPosition.x = props.carMesh.current!.position.x + Math.sin(props.carMesh.current!.rotation.y) * cameraDistance
+      newCameraPosition.x = props.carPosition.current[0] + Math.sin(props.carRotation.current[1]) * cameraDistance
     }
     if (carRotation > 0 && carRotation < 180) {
-      newCameraPosition.x = props.carMesh.current!.position.x - Math.sin(props.carMesh.current!.rotation.y) * cameraDistance
+      newCameraPosition.x = props.carPosition.current[0] - Math.sin(props.carRotation.current[1]) * cameraDistance
     }
     camera.position.x = newCameraPosition.x
     camera.position.y = newCameraPosition.y
     camera.position.z = newCameraPosition.z
-    camera.lookAt(props.carMesh.current!.position.x, props.carMesh.current!.position.y, props.carMesh.current!.position.z)
+    camera.lookAt(props.carPosition.current[0], props.carPosition.current[1], props.carPosition.current[2])
   })
   return null
 }
